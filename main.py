@@ -119,6 +119,10 @@ async def photo_handler(message: Message, match: list):
                                         f'&_={int(time() * 1000)}')
 
     train_data = json.loads(await search_response.text())
+    if len(train_data) == 0:
+        await session.close()
+        await message.answer('Поезд не найден', keyboard=default_keyboard)
+        return
     data = await get_train(train_data[0]['vid'], session)
     if not session.closed:
         await session.close()
