@@ -78,6 +78,7 @@ async def get_train(train_num: int, session: aiohttp.ClientSession = None, show_
         'lang': 'ru'
     })
     if 'не найден' in await train_response.text():
+        await session.close()
         return {'photo': None, 'message': None}
     train_soup = BeautifulSoup(await train_response.text(), 'html5lib')
     train_name, train_info, train_full_info = await get_train_info(train_soup)
