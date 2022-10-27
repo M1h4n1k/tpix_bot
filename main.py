@@ -10,9 +10,9 @@ from vkbottle import Keyboard, KeyboardButtonColor, Text, PhotoMessageUploader, 
 from vkbottle.bot import Bot, Message, MessageEvent
 from vkbottle.modules import logger
 
-logger.disable("vkbottle")
+# logger.disable("vkbottle")
 
-bot = Bot(os.getenv('TOKEN') or "")
+bot = Bot(os.getenv('TOKEN') or "b4c543fedd13bdcfbf69cadb04d69f9cd7848897494a9b0a6cde152d9b7802efb3b62558b70ac4bffc4a5")
 photo_uploader = PhotoMessageUploader(bot.api, generate_attachment_strings=True)
 
 default_keyboard = Keyboard(one_time=False, inline=False)
@@ -53,7 +53,7 @@ async def get_train_info(train_soup: BeautifulSoup):
     train_data_parsed = list(map(lambda x: tuple(map(lambda c: str(c.getText()), x.children)), train_data_raw))
     # noinspection PyTypeChecker
     train_data_dict = dict(train_data_parsed[:-1])
-    print(train_data_dict)
+    logger.debug(train_data_dict)
     train_data_dict_filtered = {
         'Дорога приписки': train_data_dict.get('Дорога приписки:'),
         'Депо': train_data_dict.get('Депо:'),
@@ -101,7 +101,7 @@ async def photo_handler(message: Message):
     rr = -1
     while data.get('photo') is None:
         rr = random.randint(1, 1000)
-        print(rr)
+        logger.debug(rr)
         data = await get_train(rr, show_info=False)
     more_info_keyboard = (
         Keyboard(inline=True).add(Callback("Больше инфы", payload={"pld": f'{rr}'})).get_json()
