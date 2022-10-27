@@ -10,7 +10,7 @@ from vkbottle import Keyboard, KeyboardButtonColor, Text, PhotoMessageUploader, 
 from vkbottle.bot import Bot, Message, MessageEvent
 from vkbottle.modules import logger
 
-# logger.disable("vkbottle")
+logger.disable("vkbottle")
 
 bot = Bot(os.getenv('TOKEN') or "b4c543fedd13bdcfbf69cadb04d69f9cd7848897494a9b0a6cde152d9b7802efb3b62558b70ac4bffc4a5")
 photo_uploader = PhotoMessageUploader(bot.api, generate_attachment_strings=True)
