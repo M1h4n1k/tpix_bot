@@ -1,9 +1,22 @@
 import aiohttp
 from bs4 import BeautifulSoup
-import re
-from loader import photo_uploader
-from vkbottle.modules import logger
 from fake_headers import Headers
+from loader import photo_uploader
+import orjson
+import re
+from time import time
+from vkbottle.modules import logger
+
+
+async def get_train_num(train_name: str):
+    session: aiohttp.ClientSession = aiohttp.ClientSession(headers=Headers(headers=True).generate())
+    search_response = await session.get(f'https://railgallery.ru/api.php?action=index-qsearch'
+                                        f'&num={train_name}'
+                                        f'&exact=1'
+                                        f'&_={int(time() * 1000)}')
+    train_num = orjson.loads(await search_response.text())
+    await session.close()
+    return train_num[0]['vid'] if len(train_num) else -1
 
 
 async def get_image(train_soup: BeautifulSoup, session: aiohttp.ClientSession):

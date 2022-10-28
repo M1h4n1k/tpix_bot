@@ -4,9 +4,18 @@ from vkbottle.bot import Message, MessageEvent
 from vkbottle.modules import logger
 
 from loader import bot
-from train_parser import get_train
+from train_parser import get_train, get_train_num
 from data.keyboards import get_default_keyboard, get_more_info_keyboard
 from data.rules import TrainRule
+from data.states import TrainState
+from data.texts import help_message
+
+
+@bot.on.message(text='/back')
+async def handler(message: Message):
+    if await bot.state_dispenser.get(message.peer_id):
+        await bot.state_dispenser.delete(message.peer_id)
+    await message.answer(help_message, keyboard=get_default_keyboard())
 
 
 @bot.on.message(text='Случайное фото')
@@ -18,15 +27,27 @@ async def photo_handler(message: Message):
         random_id = random.randint(1, 100000)
         logger.debug(random_id)
         data = await get_train(random_id, show_info=False)
-    await message.answer(data['message'], attachment=data['photo'], keyboard=get_more_info_keyboard(random_id))
+    return {
+        'message': data['message'],
+        'attachment': data['photo'],
+        'keyboard': get_more_info_keyboard(random_id)
+    }
 
 
 @bot.on.message(TrainRule('/train'))
+@bot.on.message(state=TrainState.select_train_state)
 async def photo_handler(message: Message, train_num: int = None):
+    if await bot.state_dispenser.get(message.peer_id):
+        await bot.state_dispenser.delete(message.peer_id)
+        train_num = await get_train_num(message.text)
     if train_num == -1:  # Наверно как то можно сделать че-то типа мидлвари на три функции, хз, библиотека уебанская
         return 'Поезд не найден'
     data = await get_train(train_num)
-    await message.answer(data['message'], attachment=data['photo'], keyboard=get_default_keyboard())
+    return {
+        'message': data['message'],
+        'attachment': data['photo'],
+        'keyboard':get_default_keyboard()
+    }
 
 
 @bot.on.raw_event(GroupEventType.MESSAGE_EVENT, MessageEvent)
@@ -53,22 +74,27 @@ async def photo_handler(message: Message, train_num: int = None):
     if train_num == -1:
         return 'Поезд не найден'
     data = await get_train(train_num, show_info=False)
-    await message.answer(data['message'], attachment=data['photo'], keyboard=get_default_keyboard())
+    return {
+        'message': data['message'],
+        'attachment': data['photo'],
+        'keyboard': get_default_keyboard()
+    }
 
 
 @bot.on.message(text='Поезд')
+async def train_button(message: Message):
+    await bot.state_dispenser.set(message.peer_id, TrainState.select_train_state)
+    return 'Напиши название поезда, можно неполное\nДля отмены напиши /back'
+
+
 @bot.on.message(text='Список')
 async def silly_buttons(message: Message):
-    return 'Я не знаю, что эти кнопки должны были делать, а прошлый разработчик не хочет говорить'
+    return 'Я не хочу читать код прошлого разработчика'
 
 
 @bot.on.message()
 async def handler(message: Message):
-    await message.answer('Для общения с ботом используй кнопки или команды:\n'
-                         '/train - найти фото и информацию о поезде\n'
-                         '/photo - последнее фото поезда\n'
-                         '/info - вся информация о поезде\n'
-                         '/random - случайное фото', keyboard=get_default_keyboard())
+    await message.answer(help_message, keyboard=get_default_keyboard())
 
 
 if __name__ == '__main__':
