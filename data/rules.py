@@ -13,5 +13,5 @@ class TrainRule(ABCRule[BaseMessageMin]):
     async def check(self, event: BaseMessageMin) -> dict | bool:
         groups = re.findall(self.command + r' ([\w\- ]+)', event.text)
         if len(groups):
-            return {'train_num': get_train_num(groups[0])}
+            return {'train_num': await get_train_num(groups[0])}
         return False
