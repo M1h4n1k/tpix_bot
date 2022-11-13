@@ -41,7 +41,6 @@ async def photo_handler(message: Message, train_num: int = None):
         await bot.state_dispenser.delete(message.peer_id)
         train_num = await get_train_num(message.text)
     if train_num == -1:  # Наверно как то можно сделать че-то типа мидлвари на три функции, хз, библиотека уебанская
-        # проверка работы коммитов
         return 'Поезд не найден'
     data = await get_train(train_num)
     return {
